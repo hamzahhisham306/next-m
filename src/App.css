@@ -1334,3 +1334,53 @@
 }
 
 .contact-footer .mark { color: var(--gold); }
+
+/* ═══════════════════ PERFORMANCE ═══════════════════ */
+
+/* GPU-promote the canvas layer */
+.deck-canvas {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Limit repaint area to each slide */
+.slide {
+  contain: layout paint style;
+}
+
+/* ─── Reduce motion for users who request it ─── */
+@media (prefers-reduced-motion: reduce) {
+  .ring, .cover-wave .wbar, .embers-anim .spark,
+  .brand-mark .dotmark, .rec-dot::before, .ember-underline {
+    animation: none !important;
+  }
+}
+
+/* ─── Mobile: kill the blur-heavy glow layers & heavy animations ─── */
+@media (max-width: 1024px) {
+  /* blur() is the #1 GPU killer — drop it entirely on mobile */
+  .ember-glow  { filter: none; background: radial-gradient(circle, rgba(232,98,26,.30), transparent 70%); }
+  .teal-glow   { filter: none; background: radial-gradient(circle, rgba(47,212,200,.18), transparent 70%); }
+  .plum-glow   { filter: none; background: radial-gradient(circle, rgba(178,42,58,.22), transparent 70%); }
+
+  /* Stop spinning rings — constant repaints on every frame */
+  .ring.r1, .ring.r2, .ring.r3 { animation: none; }
+
+  /* Stop floating sparks */
+  .embers-anim .spark { animation: none; opacity: 0.4; }
+
+  /* Freeze waveform bars */
+  .cover-wave .wbar { animation: none; height: var(--h, 60px) !important; opacity: 0.5; }
+
+  /* Simplify pulse animations */
+  .brand-mark .dotmark { animation: none; box-shadow: 0 0 8px var(--ember); }
+  .rec-dot::before     { animation: none; }
+  .ember-underline     { animation: none; opacity: 0.9; filter: none; }
+
+  /* Drop inner box-shadows on stat cards — costly on scaled canvas */
+  .stat-card::before { box-shadow: none; }
+  .stat-card::after  { display: none; }
+
+  /* Simplify noise texture overlay */
+  .slide::before { display: none; }
+}

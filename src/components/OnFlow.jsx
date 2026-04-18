@@ -623,6 +623,29 @@ const SlideContact = () => (
   </div>
 );
 
+// ─── Lazy slide wrapper — pauses animations on off-screen slides ───
+const LazySlide = ({ Slide, scale, designH }) => {
+  const wrapRef = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { rootMargin: `${designH * scale * 0.5}px 0px` }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [scale, designH]);
+
+  return (
+    <div ref={wrapRef} className="deck-slide-wrap">
+      {visible ? <Slide /> : <div style={{ width: 1920, height: 1080, background: "var(--ink)" }} />}
+    </div>
+  );
+};
+
 // ─── Main Deck Component ───
 const SLIDES = [SlideCover, SlideGlance, SlideWho, SlideWhy, SlideServices, SlideProjects, SlideArtists, SlideBrands, SlideHow, SlideContact];
 
@@ -647,14 +670,12 @@ export default function OnFlowDeck() {
         className="deck-canvas"
         style={{
           width: DESIGN_W,
-          transform: `scale(${scale})`,
+          transform: `scale(${scale}) translate3d(0,0,0)`,
           transformOrigin: "top left",
         }}
       >
         {SLIDES.map((Slide, i) => (
-          <div key={i} className="deck-slide-wrap">
-            <Slide />
-          </div>
+          <LazySlide key={i} Slide={Slide} scale={scale} designH={DESIGN_H} />
         ))}
       </div>
     </div>
